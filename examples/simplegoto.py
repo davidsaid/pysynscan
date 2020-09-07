@@ -1,9 +1,9 @@
 import synscan
 #
 '''Goto example'''
-mount_ip_address = "192.168.0.145"
+mount_ip_address = "192.168.0.143"
 
-smc=synscan.motors(mount_ip_address)
+smc=synscan.Motors(mount_ip_address)
 #Syncronize mount actual position to (0,0)
 smc.set_pos(0,0)
 #Move forward and wait to finish

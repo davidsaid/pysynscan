@@ -19,7 +19,7 @@ def goto(host, port,azimuth,altitude,wait):
     import synscan
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     smc.goto(azimuth,altitude,syncronous=wait)
 
 
@@ -34,7 +34,7 @@ def track(host, port, azimuth_speed, altitude_speed):
     import synscan
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     smc.track(azimuth_speed,altitude_speed)
 
 #STOP
@@ -47,7 +47,7 @@ def stop(host, port,wait):
     import synscan
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     smc.axis_stop_motion(1,syncronous=wait)
     smc.axis_stop_motion(2,syncronous=wait)
 
@@ -64,7 +64,7 @@ def watch(host, port,seconds):
     import time
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     while True:
         response=smc.update_current_values(logaxis=3)
         t = time.localtime()
@@ -88,7 +88,7 @@ def syncronize(host, port,azimuth,altitude):
     import synscan
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     smc.set_pos(azimuth,altitude)
 
 #Set On/off auxiliary switch
@@ -103,7 +103,7 @@ def switch(host, port, on,seconds):
     import time
     UDP_IP = os.getenv("SYNSCAN_UDP_IP",host)
     UDP_PORT = os.getenv("SYNSCAN_UDP_PORT",port)
-    smc=synscan.motors(UDP_IP,UDP_PORT)
+    smc=synscan.Motors(UDP_IP, UDP_PORT)
     if seconds>0:
         smc.set_switch(on)
         time.sleep(seconds)

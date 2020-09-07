@@ -1,7 +1,7 @@
 import time
 import synscan
 
-smc=synscan.motors()
+smc=synscan.Motors()
 
 #Set actual position az=0 alt=0 
 smc.set_pos(0,0)

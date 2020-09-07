@@ -10,13 +10,15 @@ import os
 import select
 import threading
 
+DEFAULT_IP_ADDRESS = "192.168.4.1"
+
 UDP_IP = os.getenv("SYNSCAN_UDP_IP", "192.168.4.1")
 UDP_PORT = os.getenv("SYNSCAN_UDP_PORT", 11880)
 
 LOGGING_LEVEL = os.getenv("SYNSCAN_LOGGING_LEVEL", logging.ERROR)
 
 
-class comm:
+class UdpCommunicationsModule:
     '''
     UDP Comunication module.
     Virtual. Used as base class. All members are protected
@@ -40,10 +42,10 @@ class comm:
         self.lock = threading.Lock()
         self.timeout_in_seconds = 2
 
-    def _send_raw_cmd(self, cmd):
+    def _send_raw_cmd(self, msg):
         '''Low level send command function '''
         with self.lock:
-            self._sock.sendto(cmd, (self.udp_ip, self.udp_port))
+            self._sock.sendto(msg, (self.udp_ip, self.udp_port))
             ready = select.select([self._sock], [], [], self.timeout_in_seconds)
             if ready[0]:
                 self.commOK = True
@@ -56,7 +58,7 @@ class comm:
                 response = False
         return response
 
-    def _send_cmd(self, cmd, axis, data=None, ndigits=6):
+    def send_command(self, cmd, axis, data=None, ndigits=6):
         '''Command function '''
         if data is None:
             ndigits = 0
@@ -149,7 +151,7 @@ class comm:
         logging.debug(f'{strData}(synscan hex) => {strHEX}(hex) => {v}(decimal)')
         return v
 
-    def test_comm(self):
+    def test_communication(self):
         '''Control msg to check comms'''
         MESSAGE = b":F3\r"
         logging.info(f"Testing comms. Asking if initialized..")
@@ -160,7 +162,7 @@ class comm:
 
 
 if __name__ == '__main__':
-    smc = comm()
+    smc = UdpCommunicationsModule()
     smc._int2hex(smc._hex2int(b'1FCA89'))
     smc._int2hex(smc._hex2int(b'5F3A'), 4)
     smc._int2hex(smc._hex2int(b'B8'), 2)

@@ -1,7 +1,7 @@
 import synscan
 import time
 '''One axis variable speed track example'''
-smc=synscan.motors()
+smc=synscan.Motors()
 
 AXIS=2
 #FORWARD

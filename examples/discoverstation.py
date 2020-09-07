@@ -3,8 +3,8 @@ import ipaddress
 import socket
 
 from multiprocessing import Pool
-from synscan.comm import comm
-from synscan.motors import motors
+from synscan.comm import UdpCommunicationsModule
+from synscan.motors import Motors
 
 GOOGLE_DNS_IP_ADDRESS = "8.8.8.8"
 TCP_PORT = 80
@@ -19,9 +19,9 @@ def get_self_interface():
 
 def is_synscan_device(ip_address, timeout_seconds=2):
     try:
-        c = comm(str(ip_address))
+        c = UdpCommunicationsModule(str(ip_address))
         c.timeout_seconds = timeout_seconds
-        return c.test_comm()
+        return c.test_communication()
     except:
         return False
 
@@ -35,9 +35,14 @@ def find_synscan_bases(pool_size=254):
 
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    logging.info("Searching for bases")
     bases = find_synscan_bases()
+    logging.info(f"Found {len(bases)}")
     for base_ip in bases:
-        smc = motors(str(base_ip))
+        logging.info(f"Simple goto on ip address {base_ip}")
+        smc = Motors(str(base_ip))
         # Syncronize mount actual position to (0,0)
         smc.set_pos(0, 0)
         # Move forward and wait to finish
