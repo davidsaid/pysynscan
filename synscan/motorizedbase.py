@@ -190,6 +190,12 @@ class Motor:
     def instant_stop(self) -> None:
         self.send_command(Command.InstantStop)
 
+    def track(self, degrees_per_second: float):
+        direction = MotionDirection.Clockwise if degrees_per_second >= 0 else MotionDirection.CounterClockwise
+        self.set_tracking_mode(direction=direction)
+        self.set_tracking_speed(abs(degrees_per_second))
+        self.start_motion()
+
     @classmethod
     def initialize(
             cls,
@@ -272,6 +278,11 @@ class AzGti:
             if sampling_function is not None:
                 samples.append(sampling_function())
         return samples
+
+    def track(self, degrees_per_second: (float, float)) -> None:
+        self.stop_motion()
+        for motor, speed in zip(self.motors(), degrees_per_second):
+            motor.track(speed)
 
     def set_aux_switch_on(self) -> None:
         self.comm.send_command(TurnAuxSwitchOn)

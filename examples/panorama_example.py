@@ -1,18 +1,20 @@
-from synscan.motorizedbase import AzGti
-from ipaddress import IPv4Address
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import time
 from datetime import datetime
+from ipaddress import IPv4Address
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from synscan.motorizedbase import AzGti
 
 exposure_time_seconds = 0.1
 scan_range_az = (0.0, 90.0)
 scan_range_dec = (0.0, 90.0)
-scan_steps_az = 4
-scan_steps_dec = 4
+scan_steps_az = 2
+scan_steps_dec = 2
 
-mount = AzGti.wifi_mount(IPv4Address("192.168.0.143"))
+mount = AzGti.wifi_mount(IPv4Address("192.168.0.145"))
 mount.set_aux_switch_off()
 mount.goto((0, 0))
 
