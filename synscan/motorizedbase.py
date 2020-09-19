@@ -1,7 +1,7 @@
 from dataclasses import field
 from ipaddress import IPv4Address
+from typing import Any, Callable
 from time import sleep
-from typing import Any, List, Callable
 
 from synscan.protocol import *
 from synscan.udp import UdpCommunicationsModule
@@ -206,6 +206,15 @@ class Motor:
         return cls(channel, counts_per_revolution, timer_interrupt_frequency, comm)
 
 
+# Discovers stations in the local network
+import ipaddress
+import socket
+from multiprocessing import Pool
+
+from typing import List
+from synscan.motorizedbase import *
+
+
 @dataclass
 class AzGti:
     """
@@ -276,12 +285,55 @@ class AzGti:
             address: IPv4Address = IPv4Address("192.168.4.1"),
             port: int = 11880,
             timeout_in_seconds: int = 2) -> 'MotorizedBase':
-        comm = UdpCommunicationsModule(address, port, timeout_in_seconds)
-        # If no exception is raised here, our connection to base is OK
-        comm.send_command(InitializeBaseCommand)
-
+        comm = cls._validate_is_comm(address, port, timeout_in_seconds)
         # Grab the motor attributes
         azimuth = Motor.initialize(Channel.Channel1, comm)
         declination = Motor.initialize(Channel.Channel2, comm)
 
         return cls(comm, azimuth, declination)
+
+    @classmethod
+    def _validate_is_comm(
+            cls,
+            ip_address: IPv4Address,
+            port: int = 11880,
+            timeout_in_seconds: float = 0.25) -> UdpCommunicationsModule:
+        comm = UdpCommunicationsModule(ip_address, port, timeout_in_seconds)
+        # If no exception is raised here, our connection to base is OK
+        comm.send_command(InitializeBaseCommand)
+
+        return comm
+
+GoogleDns = "8.8.8.8"
+TcpPort = 80
+
+
+def _get_subnet_addresses() -> List[IPv4Address]:
+    """
+    Ping the Google DNS just so we can get the local host ip_address
+        and return all the valid ip addresses in the same subnet
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect((GoogleDns, TcpPort))
+        self_ip = f"{s.getsockname()[0]}/24"
+        interface = ipaddress.ip_interface(self_ip)
+        return list(interface.network.hosts())
+
+
+def _is_synscan_device(ip_address: IPv4Address, timeout_seconds=0.25) -> bool:
+    try:
+        AzGti._validate_is_comm(ip_address, timeout_in_seconds=timeout_seconds)
+        return True
+    except:
+        return False
+
+
+def find_synscan_bases(pool_size: int = -1) -> List[AzGti]:
+    hosts = _get_subnet_addresses()
+
+    if pool_size < 1:
+        pool_size = len(hosts)
+    p = Pool(pool_size)
+    flags = p.map(_is_synscan_device, hosts)
+    p.close()
+    return [AzGti.wifi_mount(ip_address) for ip_address, is_base in zip(hosts, flags) if is_base]
